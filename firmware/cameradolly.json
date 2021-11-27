@@ -1,0 +1,21 @@
+{
+	"configuration": {
+		"mqtt_address":"127.0.0.1",
+		"mqtt_username":"foo",
+		"mqtt_password":"bar",
+		"mqtt_topic":"CameraDolly/",
+		"stepsperframe":9,
+		"defaultdirection":1,
+		"defaultimages":1000,
+		"stepperspeed":60,
+		"steps_rev":200,
+		"linear_teeth":20,
+		"linear_pitch":2,
+		"linear_deflength":2000,
+		"anglular_teeth":40,
+		"anglular_steps_teeth":200,
+		"stabilisationtime":1,
+		"interval":2,
+		"simulate":1
+	}
+}
