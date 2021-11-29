@@ -43,8 +43,14 @@ class MessageBroker:
 	def on_message(self,client, userdata, message):
 		msge =str(message.payload.decode("utf-8"))
 		msge = msge.strip()
-		print("message received " ,msge)
+		#print("message received " ,msge)
 		print("message topic=",message.topic)
+		topics = message.topic.split("/")
+		if (topics[1] == "rotate"):
+			self.dolly.rotateHead(msge)
+			return 
+		elif (topics[1] == "StatusMessage"):
+			return
 		print("message qos=",message.qos)
 		print("message retain flag=",message.retain)
 		if (len(msge.split("-")) != 2):
@@ -193,7 +199,7 @@ class MessageBroker:
 
 	# Method for transmitting dolly position status message
 	# Sends position on rail, angle of the camera head and number of images taken
-	def transmitPositionMessage(self, position, angle, images,heading,tilt,temp,volt):
+	def transmitPositionMessage(self, position, angle, images,heading,tilt,temp,volt,power):
 		message = "{\n"
 		message = message + "\"contextElements\": [\n\t{\n\t"
 		message = message + self.getDollyIDField()+",\n"
@@ -230,8 +236,13 @@ class MessageBroker:
 		message = message + "\t\t},\n"
 		message = message + "\t\t{\n"
 		message = message + "\t\t\t\"name\":\"volt\",\n"
-		message = message + "\t\t\t\"type\":\"integer\",\n"
+		message = message + "\t\t\t\"type\":\"float\",\n"
 		message = message + "\t\t\t\"value\":\""+str(volt)+"\"\n"
+		message = message + "\t\t},\n"
+		message = message + "\t\t{\n"
+		message = message + "\t\t\t\"name\":\"power\",\n"
+		message = message + "\t\t\t\"type\":\"float\",\n"
+		message = message + "\t\t\t\"value\":\""+str(power)+"\"\n"
 		message = message + "\t\t}\n"
 		message = message + "\t],\n"
 		message = message + "\t\"creDate\":\""+self.getTimeStamp()+"\"\n"
@@ -415,7 +426,7 @@ class MessageBroker:
 		self.client.publish(topic,payload=datastr,qos=0, retain=False)
 
 	def worker(self):
-		self.client.subscribe("CameraDolly/ControlMessage")
+		self.client.subscribe("CameraDolly/#")
 		self.client.loop_start()
 		try:
 			while True:

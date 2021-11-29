@@ -89,6 +89,9 @@ class Dolly:
 		kit.stepper1.release()
 		kit.stepper2.release()
 
+	def rotateHead(self, speed):
+		self.head.rotateHead(speed)
+
 	def moveDolly(self):
 		if (self.mode == Dolly.LINEAR):
 			self.stepDolly(self.numsteps)

@@ -3,13 +3,13 @@ import math
 from Configuration import *
 from MessageBroker import *
 from Adafruit_MotorHAT import *
+import RPi.GPIO as GPIO
 #from LIS3DH import LIS3DH
 from LSM303 import *
 from LSM303 import *
 
 class CameraHead:
 	def __init__(self, motorhat,config):
-		#self.mh = Adafruit_MotorHAT(addr=0x60,i2c_bus=1)
 		self.mh = motorhat
 		#self.IMU = LIS3DH(debug=True)
 		#self.IMU.setRange(LIS3DH.RANGE_2G)
@@ -22,23 +22,38 @@ class CameraHead:
 		#self.levelMargin = 0.0174533 # 1° in radians
 		self.levelMargin = 0.00436333 # 0.5° in radians
 		self.alignMargin = 0.00872665 # 0.5°
-	
+
+		#Rotation speed sensor
+		enc1 = 4
+		enc2 = 18
+		GPIO.setmode(GPIO.BCM)
+		GPIO.setup(enc1, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+		GPIO.setup(enc2, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+		GPIO.add_event_detect(enc1, GPIO.FALLING, callback=self.encoderCallback1, bouncetime=300)
+		GPIO.add_event_detect(enc2, GPIO.FALLING, callback=self.encoderCallback2, bouncetime=300)
+
+	def encoderCallback1(self,channel):
+		print("encoderCallback1")
+
+	def encoderCallback2(self,channel):
+		print("encoderCallback2")
+
 	def setMessageBroker(self,messagebroker):
 		self.mBroker = messagebroker
-	
+
 	#	def worker(self):
 
 	def getHeading(self):
-		#accel, mag = self.lsm303.read()
+		accel, mag = self.IMU.read()
 		#accel_x, accel_y, accel_z = accel
-		#mag_x, mag_y, mag_z = mag
-		#print('Accel X={0}, Accel Y={1}, Accel Z={2}, Mag X={3}, Mag Y={4}, Mag Z={5}'.format(accel_x, accel_y, accel_z, mag_x, mag_y, mag_z))
-		#compassHeadin = 0
-		#if (mag_x != 0):
-		#	compassHeadin = math.atan(mag_y/mag_x)
-		#return compassHeadin
-		return 0 # Got only accelerometer...
-	
+		mag_x, mag_y, mag_z = mag
+		print('Accel X={0}, Accel Y={1}, Accel Z={2}, Mag X={3}, Mag Y={4}, Mag Z={5}'.format(accel_x, accel_y, accel_z, mag_x, mag_y, mag_z))
+		compassHeadin = 0
+		if (mag_x != 0):
+			compassHeadin = math.atan(mag_y/mag_x)
+		return compassHeadin
+		#return 0 # Got only accelerometer...
+
 	def getTilt(self):
 		#accel, mag = self.lsm303.read()
 		#accel_x, accel_y, accel_z = accel
@@ -59,7 +74,7 @@ class CameraHead:
 
 	def rotateHead(self,speed=255,dir=Adafruit_MotorHAT.FORWARD):
 		print("rotateHead"+str(speed))
-		self.rotateMotor.setSpeed(speed)
+		self.rotateMotor.setSpeed(int(speed))
 		self.rotateMotor.run(dir)
 	
 	def tiltHead(self,speed=255,dir=Adafruit_MotorHAT.FORWARD,delay=0.1):
