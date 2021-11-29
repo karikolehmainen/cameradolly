@@ -1,6 +1,7 @@
 import logging
 import time
 import math
+from encoder import Encoder
 from datetime import datetime
 from Configuration import *
 from CameraHead import *
@@ -20,7 +21,9 @@ class Dolly:
 	startGPIO      = 21
 	enc1GPIO       = 19
 	enc2GPIO       = 13
-	encTick        = (0,0.0)
+	direction      = 0
+	lastTick       = 0
+	lastvalue      = 0
 
 	def __init__(self, configuration,motorhat):
 		# create a default object, no changes to I2C address or frequency
@@ -31,8 +34,7 @@ class Dolly:
 		GPIO.setup(self.enc2GPIO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 		GPIO.add_event_detect(self.endGPIO,   GPIO.FALLING, callback=self.endCallback, bouncetime=300)
 		GPIO.add_event_detect(self.startGPIO, GPIO.FALLING, callback=self.startCallback, bouncetime=300)
-		GPIO.add_event_detect(self.enc1GPIO, GPIO.FALLING, callback=self.enc1Callback, bouncetime=300)
-		GPIO.add_event_detect(self.enc2GPIO, GPIO.FALLING, callback=self.enc2Callback, bouncetime=300)
+		enc = Encoder(self.enc1GPIO,self.enc2GPIO, callback=self.encCallback)
 		self.mh = motorhat
 		self.config = configuration
 		self.running = 0
@@ -94,27 +96,19 @@ class Dolly:
 		self.atTheStart = 0
 		self.atTheEnd = 1
 
-	def enc1Callback(self,channel):
-		print("DOLLY enc1Callback")
+	def encCallback(self,value):
 		ts = self.timestamp()
-		if(self.encTick[0] == 2):
-			delta = ts-self.encTick[1]
-			self.calcSpeed(delta)
-		self.encTick = (1,ts)
+		direction = value-self.lastvalue
+		self.lastvalue = value
+		if (self.lastTick != 0):
+			delta = ts-self.lastTick
+			self.calcSpeed(delta,direction)
+		self.lastTick = ts
 
-
-	def enc2Callback(self,channel):
-		print("DOLLY enc2Callback")
-		ts = self.timestamp()
-		if(self.encTick[0] == 1):
-			delta = ts-self.encTick[1]
-			self.calcSpeed(delta*-1)
-		self.encTick = (2,ts)
-
-	def calcSpeed(self,ts):
+	def calcSpeed(self,ts,dir):
 		tick_dist = 40/12 # 20pcs 2mm pitch teeth and 12 position rotary coder
-		self.speed = tick_dist/(1/ts)
-		print("dollyspeed: "+str(self.speed)+"mm/sec")
+		self.speed = tick_dist/ts
+		print("dollyspeed: "+str(self.speed)+"mm/sec dir: "+str(dir)+" lastvalue: "+str(self.lastvalue))
 	#recommended for auto-disabling motors on shutdown!
 	def turnOffMotors(self):
 		kit.stepper1.release()
