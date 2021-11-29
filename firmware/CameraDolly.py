@@ -69,7 +69,8 @@ def main():
 		temperature = dolly.getTemp()
 		voltage = dolly.getVoltage()
 		current = dolly.getCurrent()
-		print("ADC values: temp: " + str(temperature) + ", power: " + str((voltage*current)/1000000) + "W")
+		power = int((voltage*current)/100000)/10.0
+		print("ADC values: temp: " + str(temperature) + ", power: " + str(power) + "W")
 		if (counter < cam.getImageNumber() and dolly.isRunning() == 1):
 			print("main: Dolly running interval "+str((time.time()-(ts+dolly.getInterval()-stabbuffer))))
 			counter = counter + 1
@@ -83,7 +84,7 @@ def main():
 			time.sleep(stabbuffer)
 			# Capture image
 			cam.takePicture()
-			mBroker.transmitPositionMessage(dolly.getPositionM(), dolly.getAngleDeg(), counter, dolly.getHeading(), dolly.getTilt(),dolly.getTemp(),dolly.getVoltage())
+			mBroker.transmitPositionMessage(dolly.getPositionM(), dolly.getAngleDeg(), counter, dolly.getHeading(), dolly.getTilt(),temperature,power)
 			statusMsq = "running"
 			lensHeater.setOn();
 			mBroker.transmitdata(statusMsq, conf.getTopic()+"StatusMessage")

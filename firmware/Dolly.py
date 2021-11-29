@@ -27,8 +27,8 @@ class Dolly:
 		self.config = configuration
 		self.running = 0
 
-		self.myMotor1 = self.mh.getMotor(2)      # Linear movement motor
-		self.myMotor1.setSpeed(255)
+		self.dollyMotor= self.mh.getMotor(2)      # Linear movement motor
+		self.dollyMotor.setSpeed(255)
 		
 		# 2mm pitch timing belt.
 		# Motor speed full throttle 30rpm
@@ -128,22 +128,23 @@ class Dolly:
 		count = 0
 		if (self.direction == Adafruit_MotorHAT.FORWARD and self.atTheEnd == 0):
 			print("stepDolly FORWARD")
-			#self.myStepper1.step(steps, self.direction, self.style)
 			while (count < steps):
-				self.myStepper1.onestep(direction=self.direction, style=self.style)
+				self.dollyMotor.run(self.direction)
 				#check if GPIO is cleared and clear the flag
 				if(GPIO.input(21) is False):
 					self.atTheStart = 0
 				count = count + 1
+				time.sleep(1)
 		if (self.direction == Adafruit_MotorHAT.BACKWARD and self.atTheStart == 0):
 			print("stepDolly BACKWARD")
-			#self.myStepper1.step(steps, self.direction, self.style)
 			#check if GPIO is cleared and clear the flag
 			while (count < steps):
-				self.myStepper1.onestep(direction=self.direction, style=self.style)
+				self.dollyMotor.run(self.direction)
 				if(GPIO.input(26) is False):
 					self.atTheEnd = 0
 				count = count + 1
+				time.sleep(1)
+		self.dollyMotor.run(Adafruit_MotorHAT.RELEASE)
 
 	def calculateLinearSteps(self):
 		if (self.mode == Dolly.LOCKANGLULAR):
@@ -199,7 +200,7 @@ class Dolly:
 	def getPositionMM(self):
 		pitch = self.config.getLinearPitch()
 		teeth = self.config.getLinearTeeth()
-		result = float(self.stepcount)*(float(pitch*teeth)/float(self.stepsPerRev))
+		result = float(self.stepcount)*(float(pitch*teeth)/12.0)
 		print("Dolly.getPositionMM = "+str(result))
 		return result
 
@@ -213,9 +214,15 @@ class Dolly:
 		#print("Dolly.getStepSizeMM = " + str(ditance))
 		return ditance
 
-#	def getAngleDeg(self):
+	def getAngleDeg(self):
+		return self.head.getHeading()
 		#steps = self.config.getAngularStepsPerTeeth()
 		#return float(self.anglecount)*float(360.0/(self.angleteeth*steps))
+	def getHeading(self):
+		return self.head.getHeading()
+
+	def getTilt(self):
+		return self.head.getTilt()
 
 	def linearHome(self):
 		#move dolly until oneof the interrupts fires
@@ -264,11 +271,6 @@ class Dolly:
 
 	# Move andular axis to home and set counter to zero
 	def anglularHome(self):
-		if (self.direction == STEPPER.BACKWARD):
-			self.myStepper1.step(self.stepcount, Adafruit_MotorHAT.FORWARD, self.style)
-		else:
-			self.myStepper1.step(self.stepcount, Adafruit_MotorHAT.BACKWARD, self.style)
-		self.anglestepcount = 0
 		self.running = 0
 
 	def isRunning(self):
