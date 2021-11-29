@@ -108,13 +108,12 @@ class Dolly:
 		ts = self.timestamp()
 		if(self.encTick[0] == 1):
 			delta = ts-self.encTick[1]
-			self.calcSpeed(delta*-1)
+			calcSpeed(delta*-1)
 		self.encTick = (2,ts)
 
 	def calcSpeed(self,ts):
 		tick_dist = 40/12 # 20pcs 2mm pitch teeth and 12 position rotary coder
-		self.speed = tick_dist/(1/ts)
-		print("dollyspeed: "+str(self.speed)+"mm/sec")
+		speed = 
 	#recommended for auto-disabling motors on shutdown!
 	def turnOffMotors(self):
 		kit.stepper1.release()

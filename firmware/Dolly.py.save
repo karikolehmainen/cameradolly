@@ -1,7 +1,6 @@
 import logging
 import time
 import math
-from datetime import datetime
 from Configuration import *
 from CameraHead import *
 from MessageBroker import *
@@ -16,23 +15,22 @@ class Dolly:
 	LOCKLINEAR     = 3
 	LOCKANGLULAR   = 4
 	I2CBUS         = 1
-	endGPIO        = 26
+	endGPIO	       = 26
 	startGPIO      = 21
 	enc1GPIO       = 19
 	enc2GPIO       = 13
-	encTick        = (0,0.0)
 
 	def __init__(self, configuration,motorhat):
 		# create a default object, no changes to I2C address or frequency
 		GPIO.setmode(GPIO.BCM)
 		GPIO.setup(self.endGPIO,   GPIO.IN, pull_up_down=GPIO.PUD_UP)
 		GPIO.setup(self.startGPIO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-		GPIO.setup(self.enc1GPIO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-		GPIO.setup(self.enc2GPIO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-		GPIO.add_event_detect(self.endGPIO,   GPIO.FALLING, callback=self.endCallback, bouncetime=300)
+		GPIO.setup(self.enc1GPIO,  GPIO.IN, pull_up_down=GPIO.PUD_UP)
+		GPIO.setup(self.enc2GPIO,  GPIO.IN, pull_up_down=GPIO.PUD_UP)
+		GPIO.add_event_detect(self.endGPIO, GPIO.FALLING, callback=self.endCallback, bouncetime=300)
 		GPIO.add_event_detect(self.startGPIO, GPIO.FALLING, callback=self.startCallback, bouncetime=300)
 		GPIO.add_event_detect(self.enc1GPIO, GPIO.FALLING, callback=self.enc1Callback, bouncetime=300)
-		GPIO.add_event_detect(self.enc2GPIO, GPIO.FALLING, callback=self.enc2Callback, bouncetime=300)
+		GPIO.add_event_detect(self.enc2GPIO, GPIO.FALLING, callback=self.enc2tCallback, bouncetime=300)
 		self.mh = motorhat
 		self.config = configuration
 		self.running = 0
@@ -94,27 +92,8 @@ class Dolly:
 		self.atTheStart = 0
 		self.atTheEnd = 1
 
-	def enc1Callback(self,channel):
-		print("DOLLY enc1Callback")
-		ts = self.timestamp()
-		if(self.encTick[0] == 2):
-			delta = ts-self.encTick[1]
-			self.calcSpeed(delta)
-		self.encTick = (1,ts)
+	def endCallback(self,channel):
 
-
-	def enc2Callback(self,channel):
-		print("DOLLY enc2Callback")
-		ts = self.timestamp()
-		if(self.encTick[0] == 1):
-			delta = ts-self.encTick[1]
-			self.calcSpeed(delta*-1)
-		self.encTick = (2,ts)
-
-	def calcSpeed(self,ts):
-		tick_dist = 40/12 # 20pcs 2mm pitch teeth and 12 position rotary coder
-		self.speed = tick_dist/(1/ts)
-		print("dollyspeed: "+str(self.speed)+"mm/sec")
 	#recommended for auto-disabling motors on shutdown!
 	def turnOffMotors(self):
 		kit.stepper1.release()
@@ -365,7 +344,3 @@ class Dolly:
 		self.stepcount = 0
 		self.running = 0
         
-	def timestamp(self):
-		now = datetime.now()
-		str_ts = "%02d.%06d"%(now.second,now.microsecond)
-		return float(str_ts)

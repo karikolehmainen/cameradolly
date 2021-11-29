@@ -70,7 +70,7 @@ def main():
 		voltage = dolly.getVoltage()
 		current = dolly.getCurrent()
 		power = int((voltage*current)/100000)/10.0
-		print("ADC values: temp: " + str(temperature) + ", power: " + str(power) + "W")
+		print("ADC values: temp: " + str(temperature) + ", power: " + str(power) + "W Voltage: "+str(int(voltage/100)/10.0)+"V")
 		if (counter < cam.getImageNumber() and dolly.isRunning() == 1):
 			print("main: Dolly running interval "+str((time.time()-(ts+dolly.getInterval()-stabbuffer))))
 			counter = counter + 1
