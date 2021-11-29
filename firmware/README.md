@@ -21,4 +21,9 @@ Track rotation sensor (gray code generator) on GPIO13 and GPIO19
 
 Endstop sensors (buttons) on GPIO20 and GPIO26
 
+In ADC there are three channels of four in use
+- Channel 0 input from current meter
+- Channel 1 input from voltage divider for battery V
+- Channel 3 input from lens temperature sensor 3.3/NTC
+
 

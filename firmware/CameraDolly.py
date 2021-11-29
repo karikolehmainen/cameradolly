@@ -66,6 +66,10 @@ def main():
 	stabbuffer = conf.getStabisationBuffer()
 	print("main: going in the foreverloop (images="+str(images)+")")
 	while (1):
+        temperature = dolly.getTemp()
+        voltage = dolly.getVoltage()
+        current = dolly.getCurrent()
+        print("ADC values: temp: " + str(temperature) + ", voltage: " + str(temperature) + ", current: " + str(current))
 		if (counter < cam.getImageNumber() and dolly.isRunning() == 1):
 			print("main: Dolly running interval "+str((time.time()-(ts+dolly.getInterval()-stabbuffer))))
 			counter = counter + 1
@@ -91,6 +95,7 @@ def main():
 			lensHeater.setOff();
 			counter = 0
 			time.sleep(1)
+    dolly.quit()
 	print("main: exiting the foreverloop")
 	return 0
 
