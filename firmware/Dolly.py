@@ -188,9 +188,12 @@ class Dolly:
 		#return voltage
 
 	def getCurrent(self):
+		# voltage read by ADC with divider 1 divided by measured mA 
+		divider = 1332.609027375103/230.0
 		value = self.adc.read_adc(self.chanCurr)
 		voltage = (value/self.adcMAX)*self.mvoltage
-		return voltage
+		#return voltage
+		return int(voltage/divider)
 
 	# retuns linear position of the dolly in millimeters
 	def getPositionMM(self):
