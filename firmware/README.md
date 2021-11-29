@@ -26,4 +26,42 @@ In ADC there are three channels of four in use
 - Channel 1 input from voltage divider for battery V
 - Channel 3 input from lens temperature sensor 3.3/NTC
 
+## MQTT Message Format ##
+This is the difinition of contol and status messages of the dolly. 
+Control message payload format is <ctrl>-<value> 
+
+- "start": Start Dolly opration
+- "stop": Stop Dolly operation
+
+### Getters ###
+- "cammodel": Retrieve Camera Model
+- "camsettinglists": Return camera settings
+- "getstepsize": Return dolly step size
+- "getstepcount": Get number of steps so far
+- "seekstart": Move dolly to start of the rail
+- "seekend": Move dolly to end of the rail
+- "getmode": Return dolly operation mode
+- "gettracking": Get tracking info
+- "getimagenumber": return image numeber counter
+- "getinterval": return image interval
+- "getposition": transmit dolly position message
+- "getheatsetting": return lens heater setting
+### Setters ###
+- "setheat (int)": set lens heater to °C temp 
+- "setmode (int)": set dolly to operation mode enumeration
+- "settargetx (double)": set tracing tarket X coordinate to x meters from rail start
+- "settargety (double)": set tracing tarket Y coordinate to x meters perpenticular from rail
+- "setstepdistance (int)": define distance on the rail between images in millimeters
+- "setanglestep (float)": define angular distance of camerarotation between images
+- "setdeclination (float)": define declination 
+- "setcomperr (float)": set compass error
+- "setimagenumber (int)": define how many images to take
+- "interval (float)": define seconds between images
+- "rotateccw": rotate head to counter clockwise direction
+- "rotatecw": rotate head to clockwise direction
+- "head_off": turn camera head off
+- "rcamsettings": trasmitt camera settings
+- "get_head_angle": return camera head tilt angle
+- "level_horizon": level camera head to horizon
+- "align_axis": align camera head with earth axis
 
