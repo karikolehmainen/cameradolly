@@ -20,11 +20,10 @@ class Dolly:
 		# create a default object, no changes to I2C address or frequency
 		GPIO.setmode(GPIO.BCM)
 		GPIO.setup(26, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-		GPIO.setup(20, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+		GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 		GPIO.add_event_detect(26, GPIO.FALLING, callback=self.endCallback, bouncetime=300)
 		GPIO.add_event_detect(21, GPIO.FALLING, callback=self.startCallback, bouncetime=300)
-		
-        self.mh = motorhat
+		self.mh = motorhat
 		self.config = configuration
 		self.running = 0
 
@@ -59,20 +58,21 @@ class Dolly:
 		self.direction = Adafruit_MotorHAT.FORWARD
 		self.angleteeth = self.config.getAngularTeeth()
 		self.anglestepsperteeth = self.config.getAngularStepsPerTeeth()
-        self.initADC()
+		self.initADC()
 
-    def initADC(self):
-        self.adc = Adafruit_ADS1x15.ADS1115(address=0x48, busnum=self.I2CBUS)
-        self.adc.gain = 1
-        self.chanCurr = 0
-        self.chanVolt = 1
-        self.chanTemp = 2
-        self.mvoltage = 3300
-        self.adcMAX = 32767
-        self.adc.start_adc()
+	def initADC(self):
+		self.adc = Adafruit_ADS1x15.ADS1115(address=0x48, busnum=self.I2CBUS)
+		self.adc.gain = 1
+		self.chanCurr = 0
+		self.chanVolt = 1
+		self.chanTemp = 2
+		self.mvoltage = 3300
+		self.adcMAX = 32767
+		#self.adc.start_adc(0)
 
-    def quit(self):
-        self.adc.stop_adc()
+	def quit(self):
+		print("Dolly.stop")
+		#self.adc.stop_adc()
 
 	def startCallback(self,channel):
 		print("falling edge detected on 20")
@@ -174,22 +174,23 @@ class Dolly:
 			return delta
 		else:
 			return 0
-   
-    # ADC read functions
+	# ADC read functions
 	def getTemp(self):
-		valueS1 = seflf.adc.read_adc(self.chanTemp)
+		valueS1 = self.adc.read_adc(self.chanTemp)
 		S1voltage = (valueS1/self.adcMAX)*self.mvoltage
 		return S1voltage
 
 	def getVoltage(self):
-		value = aseflf.adc.read_adc(self.chanVolt)
+		divider = 0.222422975571551
+		value = self.adc.read_adc(self.chanVolt)
+		voltage = (value/self.adcMAX)*self.mvoltage
+		return int(voltage/divider)
+		#return voltage
+
+	def getCurrent(self):
+		value = self.adc.read_adc(self.chanCurr)
 		voltage = (value/self.adcMAX)*self.mvoltage
 		return voltage
-  
-    def getCurrent(self):
-        value = aseflf.adc.read_adc(self.chanCurr)
-        voltage = (value/self.adcMAX)*self.mvoltage
-        return voltage
 
 	# retuns linear position of the dolly in millimeters
 	def getPositionMM(self):

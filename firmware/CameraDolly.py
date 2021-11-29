@@ -27,11 +27,11 @@ def initiateThreads(datatrans,lensheater,configuration):
 	t1 = threading.Thread(target=datatrans.worker)
 	threads.append(t1)
 	t1.start()
-	
+
 	t2 = threading.Thread(target=lensheater.worker)
 	threads.append(t2)
 	t2.start()
-	
+
 	print("started threads")
 
 def getStepCount():
@@ -66,10 +66,10 @@ def main():
 	stabbuffer = conf.getStabisationBuffer()
 	print("main: going in the foreverloop (images="+str(images)+")")
 	while (1):
-        temperature = dolly.getTemp()
-        voltage = dolly.getVoltage()
-        current = dolly.getCurrent()
-        print("ADC values: temp: " + str(temperature) + ", voltage: " + str(temperature) + ", current: " + str(current))
+		temperature = dolly.getTemp()
+		voltage = dolly.getVoltage()
+		current = dolly.getCurrent()
+		print("ADC values: temp: " + str(temperature) + ", voltage: " + str(voltage) + ", current: " + str(current))
 		if (counter < cam.getImageNumber() and dolly.isRunning() == 1):
 			print("main: Dolly running interval "+str((time.time()-(ts+dolly.getInterval()-stabbuffer))))
 			counter = counter + 1
@@ -87,7 +87,7 @@ def main():
 			statusMsq = "running"
 			lensHeater.setOn();
 			mBroker.transmitdata(statusMsq, conf.getTopic()+"StatusMessage")
-	
+
 		else:
 			statusMsq = "stopped"
 			print("main: Dolly stopped")
@@ -95,7 +95,7 @@ def main():
 			lensHeater.setOff();
 			counter = 0
 			time.sleep(1)
-    dolly.quit()
+	dolly.quit()
 	print("main: exiting the foreverloop")
 	return 0
 
