@@ -42,3 +42,8 @@ class Configuration:
 		return self.json_conf["configuration"]["interval"]
 	def isSimulation(self):
 		return self.json_conf["configuration"]["simulate"]
+	def getTrackLength(self):
+		return self.json_conf["configuration"]["track_length"]
+	def setTrackLength(self,value):
+		self.json_conf["configuration"]["track_length"] = value
+		self.saveConfiguration()

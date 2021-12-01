@@ -32,6 +32,8 @@ class MessageBroker:
 		self.client=mqtt.Client("CameraDolly",False)
 		self.client.on_message=self.on_message
 		self.client.on_log=on_log
+		self.client.on_connect = self.on_connect
+		self.client.username_pw_set(self.uname, self.passwd)
 		print("DataTransmitter.Init ready")
 		#def __del__(self):
 		#self.client.loop_stop()
@@ -44,11 +46,23 @@ class MessageBroker:
 		msge =str(message.payload.decode("utf-8"))
 		msge = msge.strip()
 		#print("message received " ,msge)
-		print("message topic=",message.topic)
+		#print("message topic=",message.topic)
 		topics = message.topic.split("/")
 		if (topics[1] == "rotate"):
 			self.dolly.rotateHead(msge)
-			return 
+			return
+		elif (topics[1] == "start"):
+			self.dolly.start()
+			return
+		elif (topics[1] == "stop"):
+			self.dolly.stop()
+			return
+		elif (topics[1] == "gotostart"):
+			self.dolly.gotoStart()
+			return
+		elif (topics[1] == "gotoend"):
+			self.dolly.gotoEnd()
+			return
 		elif (topics[1] == "StatusMessage"):
 			return
 		print("message qos=",message.qos)
@@ -58,10 +72,6 @@ class MessageBroker:
 		else:
 			msg,setting = msge.split("-")
 
-		if (msg == "start"):
-			self.dolly.start()
-		if (msg == "stop"):
-			self.dolly.stop()
 		if (msg == "cammodel"):
 			self.transmitCameraModel()
 		if (msg == "camsettinglists"):
@@ -70,11 +80,6 @@ class MessageBroker:
 			self.sendStepSize()
 		if (msg == "getstepcount"):
 			self.sendStepCount()
-		if (msg == "seekstart"):
-			print("Going to linear start")
-			self.dolly.gotoStart()
-		if (msg == "seekend"):
-			self.dolly.gotoEnd()
 		if (msg == "getmode"):
 			self.sendOpMode()
 		if (msg == "gettracking"):
@@ -143,6 +148,12 @@ class MessageBroker:
 		print("DataTransmitter.connect connecting to mqtt broker ", self.mqtturl)
 		self.client.connect(self.mqtturl,port=1883)
 		print("DataTransmitter.connect ready")
+
+	def on_connect(self, client, userdata, flags, rc):
+		if rc==0:
+			print("connected OK Returned code=",rc)
+		else:
+			print("Bad connection Returned code=",rc)
 
 	def getTimeStamp(self):
 		ts = time.time()
@@ -431,7 +442,6 @@ class MessageBroker:
 		try:
 			while True:
 				time.sleep(1)
-				print("Wait messages")
 		except KeyboardInterrupt:
 			print("exiting")
 		self.client.disconnect()

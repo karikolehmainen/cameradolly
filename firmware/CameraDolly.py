@@ -23,7 +23,7 @@ st1 = threading.Thread()
 mh = Adafruit_MotorHAT(addr=0x60,i2c_bus=I2CBUS)
 #atexit.register(turnOffMotors)
 
-def initiateThreads(datatrans,lensheater,configuration):
+def initiateThreads(datatrans,lensheater,configuration,dolly):
 	t1 = threading.Thread(target=datatrans.worker)
 	threads.append(t1)
 	t1.start()
@@ -31,6 +31,10 @@ def initiateThreads(datatrans,lensheater,configuration):
 	t2 = threading.Thread(target=lensheater.worker)
 	threads.append(t2)
 	t2.start()
+
+	t3 = threading.Thread(target=dolly.worker)
+	threads.append(t3)
+	t3.start()
 
 	print("started threads")
 
@@ -61,7 +65,7 @@ def main():
 	cam.setMessageBroker(mBroker)
 	cam.setImageNumber(images)
 	lensHeater.setMessageBroker(mBroker)
-	initiateThreads(mBroker,lensHeater,conf)
+	initiateThreads(mBroker,lensHeater,conf,dolly)
 	ts = time.time()
 	stabbuffer = conf.getStabisationBuffer()
 	print("main: going in the foreverloop (images="+str(images)+")")
@@ -91,7 +95,6 @@ def main():
 
 		else:
 			statusMsq = "stopped"
-			print("main: Dolly stopped")
 			mBroker.transmitdata(statusMsq, conf.getTopic()+"StatusMessage")
 			lensHeater.setOff();
 			counter = 0

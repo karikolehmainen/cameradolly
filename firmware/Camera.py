@@ -181,7 +181,6 @@ class Camera:
 		self.images = images
 
 	def getImageNumber(self):
-		print("Camera.getImageNumber "+str(self.images))
 		return self.images
 
 	def __del__(self):
