@@ -431,7 +431,7 @@ class MessageBroker:
 		self.transmitdata(message,self.conf.getTopic()+"SettingMessage")
 
 	def transmitdata(self,data,topic):
-		print("DataTransmitter.transmitdata topic:"+topic+" msg:"+data)
+		#print("DataTransmitter.transmitdata topic:"+topic+" msg:"+data)
 		datastr = str(data)
 		datastr = datastr.replace("'","\"")
 		self.client.publish(topic,payload=datastr,qos=0, retain=False)

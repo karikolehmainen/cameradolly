@@ -31,6 +31,10 @@ class Dolly:
 	running        = False
 	atTheStart     = False
 	atTheEnd       = False
+	PWM            = 196
+	PWMmin	       = 128
+	PWMmax	       = 512
+	speed          = 0
 
 	def __init__(self, configuration,motorhat):
 		# create a default object, no changes to I2C address or frequency
@@ -39,15 +43,15 @@ class Dolly:
 		GPIO.setup(self.startGPIO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 		GPIO.setup(self.enc1GPIO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 		GPIO.setup(self.enc2GPIO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-		GPIO.add_event_detect(self.endGPIO,   GPIO.FALLING, callback=self.endCallback, bouncetime=300)
-		GPIO.add_event_detect(self.startGPIO, GPIO.FALLING, callback=self.startCallback, bouncetime=300)
+		GPIO.add_event_detect(self.endGPIO,   GPIO.BOTH, callback=self.endCallback, bouncetime=300)
+		GPIO.add_event_detect(self.startGPIO, GPIO.BOTH, callback=self.startCallback, bouncetime=300)
 		enc = Encoder(self.enc1GPIO,self.enc2GPIO, callback=self.encCallback)
 		self.mh = motorhat
 		self.config = configuration
 		self.running = 0
 
 		self.dollyMotor= self.mh.getMotor(2)      # Linear movement motor
-		self.dollyMotor.setSpeed(255)
+		self.dollyMotor.setSpeed(self.PWM)
 		
 		# 2mm pitch timing belt.
 		# Motor speed full throttle 30rpm
@@ -69,21 +73,30 @@ class Dolly:
 		self.teeth = self.config.getLinearTeeth()
 		self.trackLength = self.config.getTrackLength()
 		self.tickDistance = (self.pitch*self.teeth)/12
-
+		self.targetSpeed = 5 # default speed 5mm/sec
 		self.declination = 0.0
 
 		self.position = 0
 		self.anglecount = 0
-		self.numsteps = self.config.getStepsPerFrame()
-		self.anglesteps = 0  # steps to rotate camera per frame (used in LocAngular and Anglular modes)
 		self.direction = self.FORWARD
-		self.angleteeth = self.config.getAngularTeeth()
-		self.anglestepsperteeth = self.config.getAngularStepsPerTeeth()
 		self.initADC()
 
 	def move(self,direction,speed):
-		self.dollyMotor.setSpeed(int(speed))
-		self.dollyMotor.run(direction)
+		if (direction == self.BACKWARD):
+			if  (GPIO.input(self.startGPIO)== GPIO.HIGH):
+				print("going for beginning at speed: "+str(int(speed)))
+				self.dollyMotor.setSpeed(int(speed))
+				self.dollyMotor.run(direction)
+			else:
+				print("Dolly.move: at the start already")
+		else:
+			if (GPIO.input(self.endGPIO)== GPIO.HIGH):
+				print("going for end at speed: "+str(int(speed)))
+				self.dollyMotor.setSpeed(int(speed))
+				self.dollyMotor.run(direction)
+			else:
+				print("Dolly.move: at the end already")
+
 
 	def initADC(self):
 		self.adc = Adafruit_ADS1x15.ADS1115(address=0x48, busnum=self.I2CBUS)
@@ -100,16 +113,24 @@ class Dolly:
 		#self.adc.stop_adc()
 
 	def startCallback(self,channel):
-		print("falling edge detected on START")
-		self.atTheStart = True
-		self.atTheEnd = False
-		self.dollyMotor.run(Adafruit_MotorHAT.RELEASE)
+		if (GPIO.input(self.startGPIO)==GPIO.LOW):
+			self.atTheStart = True
+			self.atTheEnd = False
+			self.dollyMotor.run(Adafruit_MotorHAT.RELEASE)
+			print("falling edge detected on START")
+		else:
+			print("rising edge detected on START")
+			self.atTheStart = False
 
 	def endCallback(self,channel):
-		print("falling edge detected on END")
-		self.atTheStart = False
-		self.atTheEnd = True
-		self.dollyMotor.run(Adafruit_MotorHAT.RELEASE)
+		if (GPIO.input(self.endGPIO)==GPIO.LOW):
+			print("falling edge detected on END")
+			self.atTheStart = False
+			self.atTheEnd = True
+			self.dollyMotor.run(Adafruit_MotorHAT.RELEASE)
+		else:
+			print("rising edge detected on END")
+			self.atTheEnd = False
 
 	def encCallback(self,value):
 		ts = self.timestamp()
@@ -117,17 +138,17 @@ class Dolly:
 		self.lastvalue = value
 		if (self.lastTick != 0):
 			delta = ts-self.lastTick
-			self.calcSpeed(delta,direction)
+			self.calcSpeed(delta)
 		self.lastTick = ts
 		# update position on track
 		if (self.direction == self.FORWARD):
-			self,position = self.position+self.tickDistance
+			self.position = self.position+self.tickDistance
 		else:
-			self,position = self.position-self.tickDistance
+			self.position = self.position-self.tickDistance
 
-	def calcSpeed(self,ts,dir):
+	def calcSpeed(self,ts):
 		self.speed = self.tickDistance/ts
-		print("dollyspeed: "+str(self.speed)+"mm/sec dir: "+str(dir)+" lastvalue: "+str(self.lastvalue))
+		print("dollyspeed: "+str(self.speed)+"mm/sec lastvalue: "+str(self.lastvalue))
 		return self.speed
 
 	def measureTrack(self):
@@ -136,9 +157,7 @@ class Dolly:
 		self.position = 0
 		# move dolly to the end
 		self.gotoEnd()
-		while (self.atTheStart == False):
-                        time.sleep(self.loopinterval)
-		self,trackLength = self.position
+		self.trackLength = self.position
 		# move back to start
 		self.gotoStart()
 		if (self.position != 0):
@@ -151,15 +170,13 @@ class Dolly:
 	def rotateHead(self, speed):
 		self.head.rotateHead(speed)
 
-	def moveDolly(self,speed):
+	def moveDolly(self):
 		if (self.mode == Dolly.LINEAR):
-			self.stepDolly(self.numsteps)
-			self.stepcount = self.stepcount+self.numsteps
+			self.move(self.FORWARD,self.PWM)
 
 		if (self.mode == Dolly.ANGULAR):
 			print("self.mode == Dolly.ANGULAR")
-			self.rotateHead(speed)
-			self.anglecount = self.anglecount+self.anglesteps
+			self.rotateHead(self.speed)
 
 		# add these later
 		#if (self.mode == Dolly.LINEARANGLULAR):
@@ -274,14 +291,14 @@ class Dolly:
 	def adjustSpeed(self, delta):
 		# we need to slow down delta positive
 		if (delta > 0):
-			self,PWM = self,PWM*(delta/100)
-			if (self.PWM < 1):
-				self,PWM = 1
+			self.PWM = self.PWM*(delta/100)
+			if (self.PWM < self.PWMmin):
+				self.PWM = self.PWMmin
 		# we need to speed up delta negative
 		elif(delta < 0):
-			self,PWM = self,PWM*(1+(-1*delta)/100)
-			if (self.PWM > 255):
-				self.PWM = 255
+			self.PWM = self.PWM*(1+(-1*delta)/100)
+			if (self.PWM > self.PWMmax):
+				self.PWM = self.PWMmax
 		self.move(self.direction, self.PWM)
 
 	def stop(self):
@@ -306,6 +323,7 @@ class Dolly:
 		while (self.atTheStart == False):
 			time.sleep(self.loopinterval)
 			print("gotoStart: are we there yet?")
+		self.position = 0
 		print("gotoStart: now at start")
 
 
@@ -315,7 +333,7 @@ class Dolly:
 		#move dolly until oneof the interrupts fires
 		self.direction = self.FORWARD
 		self,move(self.direction,255)
-		while(self.atTheEnd == 0):
+		while(self.atTheEnd == False):
 			time.sleep(0.5)
 		self.direction = Adafruit_MotorHAT.BACKWARD
 		print("gotoEnd: ready")
@@ -329,7 +347,11 @@ class Dolly:
 	def worker(self):
 		while True:
 			if (self.running):
+				ts = self.timestamp()
+				tdelta = ts-self.lastTick
+				self.calcSpeed(tdelta)
 				delta = (self.speed-self.targetSpeed)/self.targetSpeed
+				print("speed: "+str(self.speed)+" target: "+str(self.targetSpeed))
 				if(delta < 0.001 or delta > 0.001):
 					self.adjustSpeed(delta)
 			# thread loop

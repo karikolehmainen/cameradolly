@@ -20,7 +20,7 @@ I2CBUS = 1
 # create empty threads (these will hold the stepper 1 and 2 threads)
 st1 = threading.Thread()
 
-mh = Adafruit_MotorHAT(addr=0x60,i2c_bus=I2CBUS)
+mh = Adafruit_MotorHAT(addr=0x60,i2c_bus=I2CBUS,freq=3200)
 #atexit.register(turnOffMotors)
 
 def initiateThreads(datatrans,lensheater,configuration,dolly):
@@ -88,7 +88,7 @@ def main():
 			time.sleep(stabbuffer)
 			# Capture image
 			cam.takePicture()
-			mBroker.transmitPositionMessage(dolly.getPositionM(), dolly.getAngleDeg(), counter, dolly.getHeading(), dolly.getTilt(),temperature,int(voltage/100)/10.0,power)
+			mBroker.transmitPositionMessage(dolly.getPositionMM(), dolly.getAngleDeg(), counter, dolly.getHeading(), dolly.getTilt(),temperature,int(voltage/100)/10.0,power)
 			statusMsq = "running"
 			lensHeater.setOn();
 			mBroker.transmitdata(statusMsq, conf.getTopic()+"StatusMessage")
