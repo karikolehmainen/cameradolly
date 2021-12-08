@@ -60,6 +60,9 @@ Rotates camera head with anglural speed defined in the message body. Unit is deg
 ### /CameraDolly/measure_track ###
   Measure track by moving dolly from start to end and back. No parameters necessary.
   
+### /CameraDolly/align_axis ###
+  Align camera head with earth axis. As a paramter, give latitude of the camera in degrees e.g. 79.2344
+  
 ### Getters ###
 - "cammodel": Retrieve Camera Model
 - "camsettinglists": Return camera settings
@@ -86,5 +89,4 @@ Rotates camera head with anglural speed defined in the message body. Unit is deg
 - "rotatecw": rotate head to clockwise direction
 - "rcamsettings": trasmitt camera settings
 - "get_head_angle": return camera head tilt angle
-- "align_axis": align camera head with earth axis
 
