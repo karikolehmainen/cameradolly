@@ -48,31 +48,34 @@ class MessageBroker:
 		#print("message received " ,msge)
 		#print("message topic=",message.topic)
 		topics = message.topic.split("/")
-		if (topics[1] == "rotate"):
+		if (topics[2] == "rotate"):
 			self.dolly.rotateHead(msge)
 			return
-		elif (topics[1] == "start"):
+		elif (topics[2] == "start"):
 			self.dolly.start()
 			return
-		elif (topics[1] == "stop"):
+		elif (topics[2] == "stop"):
 			self.dolly.stop()
 			return
-		elif (topics[1] == "gotostart"):
+		elif (topics[2] == "gotostart"):
 			self.dolly.gotoStart()
 			return
-		elif (topics[1] == "gotoend"):
+		elif (topics[2] == "gotoend"):
 			self.dolly.gotoEnd()
 			return
-		elif (topics[1] == "level_horizon"):
+		elif (topics[2] == "level_horizon"):
 			self.dolly.head.levelHeadHorizon()
 			return
-		elif (topics[1] == "StatusMessage"):
+		elif (topics[2] == "StatusMessage"):
 			return
-		elif (topics[1] == "head_off"):
+		elif (topics[2] == "head_off"):
 			self.dolly.head.headOff()
 			return
-		elif (topics[1] == "measure_track"):
+		elif (topics[2] == "measure_track"):
 			self.dolly.measureTrack()
+			return
+		elif (topics[2] == "align_axis"):
+			self.dolly.head.alignEarthAxis(msge)
 			return
 
 		print("message qos=",message.qos)
@@ -146,8 +149,6 @@ class MessageBroker:
 			self.transmitCameraSettings()
 		if (msg == "get_head_angle"):
 			self.dolly.head.getTilt()
-		if (msg == "align_axis"):
-			self.dolly.head.alignEarthAxis(setting)
 
 	def connect(self):
 		print("DataTransmitter.connect connecting to mqtt broker ", self.mqtturl)
@@ -442,7 +443,7 @@ class MessageBroker:
 		self.client.publish(topic,payload=datastr,qos=0, retain=False)
 
 	def worker(self):
-		self.client.subscribe("CameraDolly/#")
+		self.client.subscribe("/CameraDolly/#")
 		self.client.loop_start()
 		try:
 			while True:

@@ -98,7 +98,7 @@ def main():
 			mBroker.transmitdata(statusMsq, conf.getTopic()+"StatusMessage")
 
 		else:
-			statusMsq = "stopped"
+			statusMsq = "{\"heading\":"+str(dolly.head.getHeadingDeg())+",\"running\":"+str(dolly.isRunning())+",\"position\":"+str(dolly.getPositionMM())+"}"
 			mBroker.transmitdata(statusMsq, conf.getTopic()+"StatusMessage")
 			lensHeater.setOff();
 			counter = 0

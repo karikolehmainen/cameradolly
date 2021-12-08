@@ -8,7 +8,6 @@ from Adafruit_MotorHAT import *
 import RPi.GPIO as GPIO
 #from LIS3DH import LIS3DH
 from LSM303 import *
-from LSM303 import *
 
 class CameraHead:
 	ROTATETOLERANCE = 0.05
@@ -93,7 +92,7 @@ class CameraHead:
 		ts = self.timestamp()
 		#self.direction = value-self.lastvalue
 		#self.lastvalue = value
-		print("HEAD.encCallback: value: "+str(value)+" direction: "+str(self.direction))
+		print("HEAD.encCallback: value: "+str(value)+" enc_direction: "+str(self.enc_direction))
 		if (self.lastTick != 0):
 			delta = ts-self.lastTick
 			self.adjustSpeed(delta)
@@ -117,6 +116,20 @@ class CameraHead:
 	def setMessageBroker(self,messagebroker):
 		self.mBroker = messagebroker
 
+	#def getHeadingDeg(self):
+	#	return math.degrees(self.getHeading())
+
+
+	def getHeadingDeg(self):
+		accel, mag = self.IMU.read()
+		mag_x, mag_y, mag_z = mag
+
+		heading = 180 * math.atan2(mag_y,mag_x)/math.pi
+		if(heading < 0):
+			heading += 360;
+		return heading
+
+	# returns magintic heading as degrees
 	def getHeading(self):
 		accel, mag = self.IMU.read()
 		accel_x, accel_y, accel_z = accel
@@ -184,7 +197,7 @@ class CameraHead:
 	def levelHeadHorizon(self):
 		tilt = self.getTilt()
 		count = 0
-		while(math.fabs(tilt) > self.levelMargin and count < 15):
+		while(math.fabs(tilt) > self.levelMargin and count < 45):
 			print("levelHeadHorizon: "+str(math.fabs(tilt))+" margin: "+str(self.levelMargin))
 			if (tilt < 0):
 				self.tiltHead(dir=Adafruit_MotorHAT.FORWARD)
@@ -194,13 +207,13 @@ class CameraHead:
 			count = count + 1
 		print("Horizon leveled")
 
-	def alignEarthAxis(self,latitude): # radians
+	def alignEarthAxis(self,latitude): # degrees
 		tilt = self.getTilt()
 		#targetAngle = 1.5708 - float(latitude)
-		targetAngle = float(latitude)
-		
+		targetAngle = math.radians(90-float(latitude)) # convert to radians
+
 		while(math.fabs(tilt-targetAngle) > self.alignMargin):
-			print("alignEarthAxis: delta "+str(math.fabs(targetAngle-tilt))+" tilt: "+str(tilt)+" target: "+str(targetAngle))
+			print("alignEarthAxis: delta "+str(math.fabs(targetAngle-tilt))+" tilt: "+str(math.degrees(tilt))+" target: "+str(math.degrees(targetAngle)))
 			if (tilt < targetAngle):
 				self.tiltHead(dir=Adafruit_MotorHAT.FORWARD)
 			else:
