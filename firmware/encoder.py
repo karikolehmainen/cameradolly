@@ -18,7 +18,7 @@ class Encoder:
         p1 = GPIO.input(self.leftPin)
         p2 = GPIO.input(self.rightPin)
         newState = "{}{}".format(p1, p2)
-
+#        print("Encoder.transitionOccurred: " + str(newState))
         if self.state == "00": # Resting position
             if newState == "01": # Turned right 1
                 self.direction = "R"
@@ -57,8 +57,11 @@ class Encoder:
                     self.value = self.value + 1
                     if self.callback is not None:
                         self.callback(self.value)
-                
         self.state = newState
 
     def getValue(self):
         return self.value
+
+    def resetValue(self):
+        self.value = 0
+

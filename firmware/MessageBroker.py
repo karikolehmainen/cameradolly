@@ -63,8 +63,18 @@ class MessageBroker:
 		elif (topics[1] == "gotoend"):
 			self.dolly.gotoEnd()
 			return
+		elif (topics[1] == "level_horizon"):
+			self.dolly.head.levelHeadHorizon()
+			return
 		elif (topics[1] == "StatusMessage"):
 			return
+		elif (topics[1] == "head_off"):
+			self.dolly.head.headOff()
+			return
+		elif (topics[1] == "measure_track"):
+			self.dolly.measureTrack()
+			return
+
 		print("message qos=",message.qos)
 		print("message retain flag=",message.retain)
 		if (len(msge.split("-")) != 2):
@@ -132,15 +142,10 @@ class MessageBroker:
 		if (msg == "rotatecw"):
 			print("on_message:rotate CW ")
 			self.dolly.head.rotateCW()
-		if (msg == "head_off"):
-			print("on_message:head off ")
-			self.dolly.head.headOff()
 		if (msg == "rcamsettings"):
 			self.transmitCameraSettings()
 		if (msg == "get_head_angle"):
 			self.dolly.head.getTilt()
-		if (msg == "level_horizon"):
-			self.dolly.head.levelHeadHorizon()
 		if (msg == "align_axis"):
 			self.dolly.head.alignEarthAxis(setting)
 
