@@ -174,7 +174,7 @@ class Dolly:
 			self.position = 0
 		print("measureTrack length: "+str(self.trackLength))
 		# save track length
-		self.configuration.setTrackLegth(self.trackLength)
+		self.config.setTrackLength(self.trackLength)
 
 	def rotateHead(self, speed):
 		self.head.rotateHead(speed)
