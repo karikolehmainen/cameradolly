@@ -65,8 +65,6 @@ Rotates camera head with anglural speed defined in the message body. Unit is deg
 - "camsettinglists": Return camera settings
 - "getstepsize": Return dolly step size
 - "getstepcount": Get number of steps so far
-- "seekstart": Move dolly to start of the rail
-- "seekend": Move dolly to end of the rail
 - "getmode": Return dolly operation mode
 - "gettracking": Get tracking info
 - "getimagenumber": return image numeber counter
@@ -86,9 +84,7 @@ Rotates camera head with anglural speed defined in the message body. Unit is deg
 - "interval (float)": define seconds between images
 - "rotateccw": rotate head to counter clockwise direction
 - "rotatecw": rotate head to clockwise direction
-- "head_off": turn camera head off
 - "rcamsettings": trasmitt camera settings
 - "get_head_angle": return camera head tilt angle
-- "level_horizon": level camera head to horizon
 - "align_axis": align camera head with earth axis
 
