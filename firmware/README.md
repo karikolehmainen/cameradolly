@@ -27,12 +27,39 @@ In ADC there are three channels of four in use
 - Channel 3 input from lens temperature sensor 3.3/NTC
 
 ## MQTT Message Format ##
-This is the difinition of contol and status messages of the dolly. 
-Control message payload format is <ctrl>-<value> 
+MQTT communication is migrating away from payload messages that were format <command>-<value>. Now commands are set with MQTT topics in format:
+  /CameraDolly/<sub_topic> 
+possible value is given in payload. For instace rotating camera head with specific angular speed can be given with following MQTT message:
+  mosquitto_pub -h localhost -p 1883 -u cdolly -P dolly -t "CameraDolly/rotate" -m "0.004125296125"
+Angular speed is given as degrees in second. Above command matches head rotation speed with earth angular speed
 
 - "start": Start Dolly opration
 - "stop": Stop Dolly operation
 
+### /CameraDolly/rotate ###
+Rotates camera head with anglural speed defined in the message body. Unit is degrees per second
+
+### /CameraDolly/start ###
+  Starts dolly operation. No parameters necessary
+  
+### /CameraDolly/stop ###
+  Stops dolly opration. No parameters necessary
+  
+### /CameraDolly/gotostart ###
+  Moves dolly to the begining of the track. No parameters necessary
+
+### /CameraDolly/gotoend ###
+  Moves dolly to the end of the track. No parameters necessary
+
+### /CameraDolly/level_horizon ###
+  Level Camera head with horizon. Seeks position so that accelerometer is level with horizon. No paramters necessary
+  
+### /CameraDolly/head_off ###
+  Turns camera head off. This is reduntant with stop message but left here for possible case that only head would be turned off. No parameters necessary.
+
+### /CameraDolly/measure_track ###
+  Measure track by moving dolly from start to end and back. No parameters necessary.
+  
 ### Getters ###
 - "cammodel": Retrieve Camera Model
 - "camsettinglists": Return camera settings
