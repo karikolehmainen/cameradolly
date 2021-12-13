@@ -63,6 +63,21 @@ Rotates camera head with anglural speed defined in the message body. Unit is deg
 ### /CameraDolly/align_axis ###
   Align camera head with earth axis. As a paramter, give latitude of the camera in degrees e.g. 79.2344
   
+### /CameraDolly/getcammodel ###
+  Return cameramodel descriptor 
+  
+### /CameraDolly/getcamsettings ###
+  Return JSON list of available camera settings.
+  
+### /CameraDolly/rcamsettings ###
+  Return JSON list of current camera settings
+
+### /CameraDolly/getheatsetting ###
+  Returns lens heater setting
+  
+### /CameraDolly/setheat ###
+  set lens heater to provided value. Value should be °C that the lens heater is set to
+  
 ### Getters ###
 - "cammodel": Retrieve Camera Model
 - "camsettinglists": Return camera settings
