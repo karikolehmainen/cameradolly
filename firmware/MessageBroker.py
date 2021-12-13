@@ -77,7 +77,22 @@ class MessageBroker:
 		elif (topics[2] == "align_axis"):
 			self.dolly.head.alignEarthAxis(msge)
 			return
-
+		elif (topics[2] == "getcammodel"):
+			self.transmitCameraModel()
+			return
+		elif (topics[2] == "getcamsettings"):
+			self.transmitCameraSettingsLists()
+			return
+		elif (topics[2] == "getheatsetting"):
+			self.transmitHeatSetting()
+			return
+		elif (topics[2] == "setheat"):
+			self.heater.setPWM(int(setting))
+			return
+		elif (topics[2] == "rcamsettings"):
+			self.transmitCameraSettings()
+			return
+# Legacy messages from here on...
 		print("message qos=",message.qos)
 		print("message retain flag=",message.retain)
 		if (len(msge.split("-")) != 2):
@@ -85,10 +100,6 @@ class MessageBroker:
 		else:
 			msg,setting = msge.split("-")
 
-		if (msg == "cammodel"):
-			self.transmitCameraModel()
-		if (msg == "camsettinglists"):
-			self.transmitCameraSettingsLists()
 		if (msg == "getstepsize"):
 			self.sendStepSize()
 		if (msg == "getstepcount"):
@@ -104,11 +115,6 @@ class MessageBroker:
 			self.sendImageInterval()
 		if (msg == "getposition"):
 			self.transmitPositionMessage(dolly.getPositionMM, dolly.getAngleDeg(), getCounter(),dolly.getHeading(),dolly.getTilt(),dolly.getTemp(),dolly.getVoltage())
-		if (msg == "getheatsetting"):
-			self.transmitHeatSetting()
-		if (msg == "setheat"):
-			print("on_message: set heat to "+setting)
-			self.heater.setPWM(int(setting))
 		if (msg == "setmode"):
 			print("on_message: set mode to "+setting)
 			self.dolly.setOperationModes(int(setting))
@@ -145,8 +151,6 @@ class MessageBroker:
 		if (msg == "rotatecw"):
 			print("on_message:rotate CW ")
 			self.dolly.head.rotateCW()
-		if (msg == "rcamsettings"):
-			self.transmitCameraSettings()
 		if (msg == "get_head_angle"):
 			self.dolly.head.getTilt()
 
