@@ -1,0 +1,52 @@
+{
+  "_buildCommand2" : {
+    "command" : "prepareForIndexing",
+    "enableIndexBuildArena" : false,
+    "targets" : null
+  },
+  "buildCommand" : "build",
+  "configuredTargets" : [
+    {
+      "guid" : "bfdfe7dc352907fc980b868725387e98674427677ed50870bbe9310a50295dc1"
+    },
+    {
+      "guid" : "bfdfe7dc352907fc980b868725387e984c64ba1e6e760510ae6a2f0aa4c68e8a"
+    },
+    {
+      "guid" : "bfdfe7dc352907fc980b868725387e98a35735b96e7963fe0fddb50485e684a5"
+    }
+  ],
+  "containerPath" : "/Users/kkolehma/Documents/cameradolly/mobile/ios/CameraDolly/Pods/Pods.xcodeproj",
+  "continueBuildingAfterErrors" : true,
+  "enableIndexBuildArena" : false,
+  "hideShellScriptEnvironment" : false,
+  "parameters" : {
+    "action" : "build",
+    "arenaInfo" : {
+      "buildIntermediatesPath" : "",
+      "buildProductsPath" : "",
+      "derivedDataPath" : "/Users/kkolehma/Library/Developer/Xcode/DerivedData",
+      "indexDataStoreFolderPath" : "/Users/kkolehma/Library/Developer/Xcode/DerivedData/Pods-dcbcjczpogdsrzerpuvfozletafs/Index/DataStore",
+      "indexEnableDataStore" : true,
+      "indexPCHPath" : "/Users/kkolehma/Library/Developer/Xcode/DerivedData/Pods-dcbcjczpogdsrzerpuvfozletafs/Index/PrecompiledHeaders",
+      "pchPath" : ""
+    },
+    "configurationName" : "Release",
+    "overrides" : {
+      "synthesized" : {
+        "table" : {
+          "ENABLE_PREVIEWS" : "NO"
+        }
+      }
+    }
+  },
+  "qos" : "default",
+  "schemeCommand" : "launch",
+  "schemeCommand2" : "launch",
+  "shouldCollectMetrics" : false,
+  "showNonLoggedProgress" : true,
+  "useDryRun" : true,
+  "useImplicitDependencies" : false,
+  "useLegacyBuildLocations" : false,
+  "useParallelTargets" : false
+}

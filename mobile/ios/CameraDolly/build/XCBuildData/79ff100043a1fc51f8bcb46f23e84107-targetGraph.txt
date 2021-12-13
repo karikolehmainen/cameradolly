@@ -1,0 +1,7 @@
+Target dependency graph (3 targets)
+CocoaAsyncSocket in Pods, no dependencies
+CocoaMQTT in Pods, depends on:
+CocoaAsyncSocket in Pods (explicit)
+Pods-CameraDolly in Pods, depends on:
+CocoaAsyncSocket in Pods (explicit)
+CocoaMQTT in Pods (explicit)
