@@ -93,16 +93,13 @@ def main():
 			# Capture image
 			cam.takePicture()
 			mBroker.transmitPositionMessage(dolly.getPositionMM(), dolly.getAngleDeg(), counter, dolly.getHeading(), dolly.getTilt(),temperature,int(voltage/100)/10.0,power)
-			statusMsq = "running"
 			lensHeater.setOn();
-			mBroker.transmitdata(statusMsq, conf.getTopic()+"StatusMessage")
-
 		else:
-			statusMsq = "{\"heading\":"+str(dolly.head.getHeadingDeg())+",\"running\":"+str(dolly.isRunning())+",\"position\":"+str(dolly.getPositionMM())+"}"
-			mBroker.transmitdata(statusMsq, conf.getTopic()+"StatusMessage")
 			lensHeater.setOff();
 			counter = 0
 			time.sleep(1)
+		statusMsq = "{\"heading\":"+str(dolly.head.getHeadingDeg())+",\"running\":"+str(dolly.isRunning())+",\"head_status\":"+str(dolly.head.isRunning())+",\"position\":"+str(dolly.getPositionMM())+"}"
+		mBroker.transmitdata(statusMsq, conf.getTopic()+"StatusMessage")
 	dolly.quit()
 	print("main: exiting the foreverloop")
 	return 0

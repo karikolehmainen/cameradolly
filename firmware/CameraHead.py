@@ -36,6 +36,7 @@ class CameraHead:
 		self.targetTicktime = 0
 		self.loopinterval = 2
 		self.speed=196
+		self.targetSpeed = 0.004125296125 #default earth speed
 		self.running = False
 		self.lastTick = self.timestamp()
 		self.lastEncTick = self.lastTick
@@ -120,6 +121,12 @@ class CameraHead:
 	#	return math.degrees(self.getHeading())
 
 
+	def isRunning(self):
+		if (self.running):
+			return 1
+		else:
+			return 0
+
 	def getHeadingDeg(self):
 		accel, mag = self.IMU.read()
 		mag_x, mag_y, mag_z = mag
@@ -163,7 +170,11 @@ class CameraHead:
 	def rotateHead(self,speed,dir=Adafruit_MotorHAT.FORWARD):
 		print("CameraHead.rotateHead: "+str(speed))
 		# convert speed to time target between tick
-		self.targetSpeed = float(speed)
+		try:
+			if (float(speed) != self.targetSpeed):
+				self.targetSpeed = float(speed)
+		except:
+			print("rotateHead:typeconversion error:"+str(speed))
 		# head has 1:90 and 1:30 reduction gears 
 		self.targetTicktime = 30/(90*30*self.targetSpeed)
 		self.direction = dir
@@ -191,6 +202,7 @@ class CameraHead:
 						 
 	def headOff(self):
 		self.rotateMotor.run(Adafruit_MotorHAT.RELEASE)
+		self.running = False
 	def stop(self):
 		self.headOff()
 
