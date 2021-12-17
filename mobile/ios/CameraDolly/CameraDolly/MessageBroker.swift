@@ -7,6 +7,7 @@
 
 import Foundation
 import CocoaMQTT
+import SwiftUI
 
 enum MBAction {
     case connectToServer
@@ -28,6 +29,7 @@ class MessageBroker : ObservableObject {
     var password = UserDefaults.standard.string(forKey: "mqttPass") ?? ""
         
     var mqtt: CocoaMQTT?
+    var ctrl: ContentView!
     
     init()
     {
@@ -40,12 +42,16 @@ class MessageBroker : ObservableObject {
         mqtt!.keepAlive = 60
         mqtt!.delegate = self
     }
+    func setCtrlView(object: ContentView)
+    {
+        ctrl = object
+    }
     
     func connectToServer() -> Bool {
         //_ = mqtt!.connect()
         let ret = mqtt!.connect()
         print("MessageBroger: connectToServer: ",ret)
-
+        //mqtt!.subscribe("/CameraDolly/#")
         return ret
     }
     
@@ -61,10 +67,38 @@ class MessageBroker : ObservableObject {
         let message = ""
         sendMessage(message:message, topic: topic)
     }
+    func rotateHead(operation: String){
+        print("MassageBroker:rotateHead:"+operation)
+        var topic = "/CameraDolly/head_off"
+        let message = ""
+        if (operation == "Start Rotate")
+        {
+            topic = "/CameraDolly/rotate"
+        }
+        sendMessage(message:message, topic: topic)
+    }
     func rewindDolly(){
         print("MassageBroker:rewindDolly")
         let topic = "/CameraDolly/gotostart"
         let message = ""
+        sendMessage(message:message, topic: topic)
+    }
+    func levelHead(){
+        print("MassageBroker:levelHead")
+        let topic = "/CameraDolly/level_horizon"
+        let message = ""
+        sendMessage(message:message, topic: topic)
+    }
+    func alignHead(){
+        print("MassageBroker:alignHead")
+        var locationManager = LocationManager()
+        let location = locationManager.location
+        let topic = "/CameraDolly/align_axis"
+        var message = "79.95"
+        if (location != nil)
+        {
+            message = String(location!.latitude)
+        }
         sendMessage(message:message, topic: topic)
     }
     
@@ -99,22 +133,12 @@ class MessageBroker : ObservableObject {
         let userInfo = notification.userInfo as! [String: AnyObject]
         let message = userInfo["message"] as! String
         let topic = userInfo["topic"] as! String
-        print("receivedMessage  "+message+","+topic+")")
-        //let chatMessage = ChatMessage(sender: sender, content: content, id: id)
-        //messages.append(chatMessage)
-    }
-
-    @objc func receivedMqtt5Message(notification: NSNotification) {
-        let userInfo = notification.userInfo as! [String: AnyObject]
-        let message = userInfo["message"] as! String
-        let topic = userInfo["topic"] as! String
-        print("receivedMqtt5Message  "+message+","+topic+")")
+        print("MassageBroker:receivedMessage  "+message+","+topic+")")
         //messages.append(chatMessage)
     }
 }
 
 extension MessageBroker: CocoaMQTTDelegate {
-
     // Optional ssl CocoaMQTTDelegate
     func mqtt(_ mqtt: CocoaMQTT, didReceive trust: SecTrust, completionHandler: @escaping (Bool) -> Void) {
         TRACE("trust: \(trust)")
@@ -134,7 +158,8 @@ extension MessageBroker: CocoaMQTTDelegate {
         TRACE("ack: \(ack)")
 
         if ack == .accept {
-            mqtt.subscribe("chat/room/animals/client/+", qos: CocoaMQTTQoS.qos1)
+            print("MassageBroker:CocoaMQTTDelegate:mqtt subscribe to topics")
+            mqtt.subscribe("/CameraDolly/#", qos: CocoaMQTTQoS.qos1)
 
             //let chatViewController = storyboard?.instantiateViewController(withIdentifier: "ChatViewController") as? ChatViewController
             //chatViewController?.mqtt = mqtt
@@ -157,7 +182,11 @@ extension MessageBroker: CocoaMQTTDelegate {
 
     func mqtt(_ mqtt: CocoaMQTT, didReceiveMessage message: CocoaMQTTMessage, id: UInt16 ) {
         TRACE("message: \(message.string.description), id: \(id)")
-
+        if (message.topic == "/CameraDolly/StatusMessage")
+        {
+            ctrl.updateState(message: message.string ?? "")
+        }
+        //ctrl.stateToUpdate = message.string ?? ""
         let name = NSNotification.Name(rawValue: "MQTTMessageNotification")
         NotificationCenter.default.post(name: name, object: self, userInfo: ["message": message.string!, "topic": message.topic, "id": id])
     }
