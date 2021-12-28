@@ -16,15 +16,12 @@ class CameraHead:
 	defaultspeed = 255
 	def __init__(self, motorhat,config):
 		self.mh = motorhat
-		#self.IMU = LIS3DH(debug=True)
-		#self.IMU.setRange(LIS3DH.RANGE_2G)
 		self.IMU = LSM303()
 		self.mh = motorhat
 		self.tiltMotor = self.mh.getMotor(1)      # Head Tilt motor
 		self.tiltMotor.setSpeed(255)
 		self.rotateMotor = self.mh.getMotor(4)      #  Head Motor on channel 4
 		self.rotateMotor.setSpeed(self.defaultspeed)
-		#self.levelMargin = 0.0174533 # 1° in radians
 		self.levelMargin = 0.00436333 # 0.5° in radians
 		self.alignMargin = 0.00872665 # 0.5°
 		#Rotation speed sensor
@@ -94,11 +91,12 @@ class CameraHead:
 		#self.direction = value-self.lastvalue
 		#self.lastvalue = value
 		print("HEAD.encCallback: value: "+str(value)+" enc_direction: "+str(self.enc_direction))
-		if (self.lastTick != 0):
-			delta = ts-self.lastTick
-			self.adjustSpeed(delta)
-			print("HEAD.encCallback: delta: " + str(delta))
+		#if (self.lastTick != 0):
+			#delta = ts-self.lastTick
+			#self.adjustSpeed(delta)
+			#print("HEAD.encCallback: delta: " + str(delta))
 		self.lastTick = ts
+		self.running  = True
 
 	def adjustSpeed(self,delta):
 		diff = self.targetTicktime - delta
@@ -194,15 +192,18 @@ class CameraHead:
 		self.rotateMotor.run(Adafruit_MotorHAT.FORWARD)
 		time.sleep(self.rotateTick)
 		self.rotateMotor.run(Adafruit_MotorHAT.RELEASE)
-						 
+		self.running = False
+
 	def rotateCCW(self):
 		self.rotateMotor.run(Adafruit_MotorHAT.BACKWARD)
 		time.sleep(self.rotateTick)
 		self.rotateMotor.run(Adafruit_MotorHAT.RELEASE)
-						 
+		self.running = False
+
 	def headOff(self):
 		self.rotateMotor.run(Adafruit_MotorHAT.RELEASE)
 		self.running = False
+
 	def stop(self):
 		self.headOff()
 

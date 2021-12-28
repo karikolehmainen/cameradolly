@@ -32,7 +32,7 @@ class Dolly:
 	moving	       = False
 	atTheStart     = False
 	atTheEnd       = False
-	PWM            = 128
+	PWM            = 255
 	PWMmin	       = 16
 	PWMmax	       = 255
 	speed          = 0
@@ -49,7 +49,7 @@ class Dolly:
 		self.enc = Encoder(self.enc1GPIO,self.enc2GPIO, callback=self.encCallback)
 		self.mh = motorhat
 		self.config = configuration
-		self.running = 0
+		self.running = False
 
 		self.dollyMotor= self.mh.getMotor(2)      # Linear movement motor
 		self.dollyMotor.setSpeed(self.PWM)
@@ -83,6 +83,7 @@ class Dolly:
 		self.initADC()
 
 	def move(self,direction,speed):
+		print("Dolly.move("+str(direction)+","+str(speed)+")")
 		if (direction == self.BACKWARD):
 			if  (GPIO.input(self.startGPIO)== GPIO.HIGH):
 				print("going for beginning at speed: "+str(int(speed)))
@@ -96,7 +97,7 @@ class Dolly:
 				self.dollyMotor.setSpeed(int(speed))
 				self.dollyMotor.run(direction)
 			else:
-					print("Dolly.move: at the end already")
+				print("Dolly.move: at the end already")
 		self.moving = True
 
 	def initADC(self):
@@ -120,6 +121,7 @@ class Dolly:
 			self.atTheEnd = False
 			self.dollyMotor.run(Adafruit_MotorHAT.RELEASE)
 			self.enc.resetValue()
+			self.position = 0
 			print("falling edge detected on START")
 		else:
 			print("rising edge detected on START")
@@ -140,7 +142,7 @@ class Dolly:
 		ts = self.timestamp()
 		direction = value-self.lastvalue
 		self.lastvalue = value
-		#print("encCallback: value: "+str(value)+" direction: "+str(direction))
+		print("Dolly.encCallback: value: "+str(value)+" direction: "+str(direction))
 		if (self.lastTick != 0):
 			delta = ts-self.lastTick
 			self.calcSpeed(delta)
@@ -180,13 +182,14 @@ class Dolly:
 		self.head.rotateHead(speed)
 
 	def moveDolly(self):
-		if (self.running == False):
-			if (self.mode == Dolly.LINEAR):
-				self.move(self.FORWARD,self.PWM)
+		print("moveDolly: "+str(self.mode)+" running: "+str(self.running))
+		#if (self.running == False):
+		if (self.mode == Dolly.LINEAR):
+			self.move(self.FORWARD,self.PWM)
 
-			if (self.mode == Dolly.ANGULAR):
-				print("self.mode == Dolly.ANGULAR")
-				self.rotateHead(self.speed)
+		if (self.mode == Dolly.ANGULAR):
+			print("self.mode == Dolly.ANGULAR")
+			self.rotateHead(self.speed)
 
 		# add these later
 		#if (self.mode == Dolly.LINEARANGLULAR):
@@ -262,7 +265,7 @@ class Dolly:
 		return self.head.getTilt()
 
 	def setOperationModes(self,mode):
-		if (self.running == 1):
+		if (self.running == True):
 			self.running = 0
 			self.gotoStarte()
 			self.anglularHome()
@@ -296,10 +299,13 @@ class Dolly:
 
 	# Move andular axis to home and set counter to zero
 	def anglularHome(self):
-		self.running = 0
+		self.running = False
 
 	def isRunning(self):
-		return self.running
+		if(self.running):
+			return 1
+		else:
+			return 0
 
 	def start(self):
 		# moe to start
@@ -307,7 +313,7 @@ class Dolly:
 		# calculate needed speed
 		self.direction = self.FORWARD
 		self.move(self.direction, self.PWM) 
-		self.running = 1
+		self.running = True
 
 	def adjustSpeed(self, delta):
 		# we need to slow down delta positive
@@ -325,7 +331,7 @@ class Dolly:
 	def stop(self):
 		self.dollyMotor.run(Adafruit_MotorHAT.RELEASE)
 		self.head.stop()
-		self.running = 0
+		self.running = False
 
 	def getHeadAlignment(self):
 		accel_x = sensor.getX()
@@ -359,7 +365,7 @@ class Dolly:
 			time.sleep(0.5)
 		self.direction = Adafruit_MotorHAT.BACKWARD
 		print("gotoEnd: ready")
-		self.running = 0
+		self.running = False
 
 	def timestamp(self):
 		now = datetime.now()
@@ -373,11 +379,11 @@ class Dolly:
 				tdelta = ts-self.lastTick
 				self.calcSpeed(tdelta)
 				delta = (self.speed-self.targetSpeed)
-				print("speed: "+str(self.speed)+" target: "+str(self.targetSpeed)+" delta: "+str(delta))
+				#print("speed: "+str(self.speed)+" target: "+str(self.targetSpeed)+" delta: "+str(delta))
 				#if(delta < 0.001 or delta > 0.001):
 				#	self.adjustSpeed(delta)
-				if(delta < 0):
-					self.move(self.FORWARD,255)
+				#if(delta < 0):
+				#	self.move(self.FORWARD,255)
 			# thread loop
 			time.sleep(self.loopinterval/2)
 

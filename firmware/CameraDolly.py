@@ -83,15 +83,20 @@ def main():
 			print("main: Dolly running interval "+str((time.time()-(ts+dolly.getInterval()-stabbuffer))))
 			counter = counter + 1
 			# wait until enough time has passed since last photo. 
-			while (time.time()<(ts+dolly.getInterval()-stabbuffer)):
-				time.sleep(0.1)
 			ts = time.time()
 			# Move dolly
 			dolly.moveDolly()
+			while (dolly.moving == True):
+				time.sleep(0.1)
+			print("\tDolly moved")
+			while (time.time()<(ts+dolly.getInterval()-stabbuffer)):
+				time.sleep(0.1)
 			# Wait for awhile
 			time.sleep(stabbuffer)
 			# Capture image
+			print("\tPicture take")
 			cam.takePicture()
+			print("\tPicture taken")
 			mBroker.transmitPositionMessage(dolly.getPositionMM(), dolly.getAngleDeg(), counter, dolly.getHeading(), dolly.getTilt(),temperature,int(voltage/100)/10.0,power)
 			lensHeater.setOn();
 		else:

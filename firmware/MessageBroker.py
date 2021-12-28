@@ -48,50 +48,51 @@ class MessageBroker:
 		#print("message received " ,msge)
 		#print("message topic=",message.topic)
 		topics = message.topic.split("/")
-		if (topics[2] == "rotate"):
-			self.dolly.rotateHead(msge)
-			return
-		elif (topics[2] == "start"):
-			self.dolly.start()
-			return
-		elif (topics[2] == "stop"):
-			self.dolly.stop()
-			return
-		elif (topics[2] == "gotostart"):
-			self.dolly.gotoStart()
-			return
-		elif (topics[2] == "gotoend"):
-			self.dolly.gotoEnd()
-			return
-		elif (topics[2] == "level_horizon"):
-			self.dolly.head.levelHeadHorizon()
-			return
-		elif (topics[2] == "StatusMessage"):
-			return
-		elif (topics[2] == "head_off"):
-			self.dolly.head.headOff()
-			return
-		elif (topics[2] == "measure_track"):
-			self.dolly.measureTrack()
-			return
-		elif (topics[2] == "align_axis"):
-			self.dolly.head.alignEarthAxis(msge)
-			return
-		elif (topics[2] == "getcammodel"):
-			self.transmitCameraModel()
-			return
-		elif (topics[2] == "getcamsettings"):
-			self.transmitCameraSettingsLists()
-			return
-		elif (topics[2] == "getheatsetting"):
-			self.transmitHeatSetting()
-			return
-		elif (topics[2] == "setheat"):
-			self.heater.setPWM(int(setting))
-			return
-		elif (topics[2] == "rcamsettings"):
-			self.transmitCameraSettings()
-			return
+		if (len(topics)>2):
+			if (topics[2] == "rotate"):
+				self.dolly.rotateHead(msge)
+				return
+			elif (topics[2] == "start"):
+				self.dolly.start()
+				return
+			elif (topics[2] == "stop"):
+				self.dolly.stop()
+				return
+			elif (topics[2] == "gotostart"):
+				self.dolly.gotoStart()
+				return
+			elif (topics[2] == "gotoend"):
+				self.dolly.gotoEnd()
+				return
+			elif (topics[2] == "level_horizon"):
+				self.dolly.head.levelHeadHorizon()
+				return
+			elif (topics[2] == "StatusMessage"):
+				return
+			elif (topics[2] == "head_off"):
+				self.dolly.head.headOff()
+				return
+			elif (topics[2] == "measure_track"):
+				self.dolly.measureTrack()
+				return
+			elif (topics[2] == "align_axis"):
+				self.dolly.head.alignEarthAxis(msge)
+				return
+			elif (topics[2] == "getcammodel"):
+				self.transmitCameraModel()
+				return
+			elif (topics[2] == "getcamsettings"):
+				self.transmitCameraSettingsLists()
+				return
+			elif (topics[2] == "getheatsetting"):
+				self.transmitHeatSetting()
+				return
+			elif (topics[2] == "setheat"):
+				self.heater.setPWM(int(setting))
+				return
+			elif (topics[2] == "rcamsettings"):
+				self.transmitCameraSettings()
+				return
 # Legacy messages from here on...
 		print("message qos=",message.qos)
 		print("message retain flag=",message.retain)
@@ -285,20 +286,20 @@ class MessageBroker:
 		message = message + "\t\t{\n"
 		message = message + "\t\t\t\"name\":\"shutterspeed\",\n"
 		message = message + "\t\t\t\"type\":\"integer\",\n"
-		message = message + "\t\t\t\"value\":\""+self.camera.getShutterSpeedIndx()+"\"\n"
+		message = message + "\t\t\t\"value\":\""+str(self.camera.getShutterSpeedIndx())+"\"\n"
 		message = message + "\t\t},\n"
 		message = message + "\t\t{\n"
 		message = message + "\t\t\t\"name\":\"aperture\",\n"
 		message = message + "\t\t\t\"type\":\"integer\",\n"
-		message = message + "\t\t\t\"value\":\""+self.camera.getApertureIndx()+"\"\n"
+		message = message + "\t\t\t\"value\":\""+str(self.camera.getApertureIndx())+"\"\n"
 		message = message + "\t\t},\n"
 		message = message + "\t\t{\n"
 		message = message + "\t\t\t\"name\":\"isovalue\",\n"
 		message = message + "\t\t\t\"type\":\"integer\",\n"
-		message = message + "\t\t\t\"value\":\""+self.camera.getISOIndx()+"\"\n"
+		message = message + "\t\t\t\"value\":\""+str(self.camera.getISOIndx())+"\"\n"
 		message = message + "\t\t}\n"
 		message = message + "\t],\n"
-		message = message + "\t\"creDate\":\""+self.getTimeStamp()+"\"\n"
+		message = message + "\t\"creDate\":\""+str(self.getTimeStamp())+"\"\n"
 		message = message + "\t}\n]}"
 		self.transmitdata(message,self.conf.getTopic()+"CameraModelMessage")
 	
